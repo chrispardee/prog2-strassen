@@ -254,27 +254,27 @@ def getNumTriangles(A):
 # printNice(gCubed)
 # print(getNumTriangles(gCubed))
 
-probs = [0.01, 0.02, 0.03, 0.04, 0.05]
-CROSS = 64
-for p in probs:
-    graph = randomGraph(p, 128)
-    # printNice(graph)
-    graphNumPy = np.array(graph)
-    graph2 = strassen(graph, graph, CROSS)
-    graph2NumPy = np.dot(graphNumPy,graphNumPy)
-    if np.array_equal(np.array(graph2), graph2NumPy):
-        print("Graph squared correctly")
-    else:
-        print("Graph squared incorrectly")
-    graph3 = strassen(graph, graph2, CROSS)
-    graph3NumPy = np.dot(graphNumPy,graph2NumPy)
-    if np.array_equal(np.array(graph3), graph3NumPy):
-        print("Graph cubed correctly")
-    else:
-        print("Graph cubed incorrectly")
-    # print("Cube of random graph:")
-    # printNice(graph3)
-    print("Number of triangles: " + str(getNumTriangles(graph3)))
+# probs = [0.01, 0.02, 0.03, 0.04, 0.05]
+# CROSS = 64
+# for p in probs:
+#     graph = randomGraph(p, 128)
+#     # printNice(graph)
+#     graphNumPy = np.array(graph)
+#     graph2 = strassen(graph, graph, CROSS)
+#     graph2NumPy = np.dot(graphNumPy,graphNumPy)
+#     if np.array_equal(np.array(graph2), graph2NumPy):
+#         print("Graph squared correctly")
+#     else:
+#         print("Graph squared incorrectly")
+#     graph3 = strassen(graph, graph2, CROSS)
+#     graph3NumPy = np.dot(graphNumPy,graph2NumPy)
+#     if np.array_equal(np.array(graph3), graph3NumPy):
+#         print("Graph cubed correctly")
+#     else:
+#         print("Graph cubed incorrectly")
+#     # print("Cube of random graph:")
+#     # printNice(graph3)
+#     print("Number of triangles: " + str(getNumTriangles(graph3)))
 
 
 # tests()
@@ -367,37 +367,39 @@ if __name__ == "__main__":
     # take input from command line
     # ./strassen 0 dimension inputfile
 
-    #sys.argv[0] # this is 0
-    dims = sys.argv[1]
-    filename = sys.argv[2]
+    #sys.argv[1] # this is 0
+    dims = int(sys.argv[2])
+    filename = sys.argv[3]
+    CROSS = 64
 
     A = []
     B = []
     with open(filename, "r") as f:
-        i = 0
-        j = 0
-        usingB = False
-        A.append([])
+        counter = 0
+        row = -1
         for line in f:
-            if j < dims:
-                if not usingB:
-                    A[i].append(int(line))
-                else:
-                    B[i].append(int(line))
-                j += 1
-            else:
-                j = 0
-                i += 1
-                if not usingB:
+            if counter == dims ** 2:
+                row = -1
+            if counter < dims ** 2:
+                if counter % dims == 0:
                     A.append([])
-                else:
+                    row += 1
+                A[row].append(int(line))
+            else:
+                if counter % dims == 0:
                     B.append([])
-            if i >= dims:
-                i = 0
-                j = 0
-                usingB = True
+                    row += 1
+                B[row].append(int(line))
+            counter += 1    
     
+    printNice(A)
+    print()
+    printNice(B)
+    print()
+
     C = strassen(A, B, CROSS)
+    printNice(C)
+    print()
     
     # output the diagonal of C
     for i in range(dims):

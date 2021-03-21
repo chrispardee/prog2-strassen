@@ -1,0 +1,2 @@
+#!/bin/bash
+Python strassen.py $1 $2 $3
