@@ -43,7 +43,7 @@ def makePow2Mats(A, B):
             B[j].append(0)
         A.append([0] * (i+1))
         B.append([0] * (i+1))
-        
+
         if checkPow2(i+1) == True:
             size = i + 1
             break
@@ -71,10 +71,16 @@ def naive(A, B):
     n = len(A)
     C = makeEmptyListMat(n)
 
+    # Debugging: A is len 51 and B is len 50. So B[50] doesn't exist.
+    # Why is B smaller than A?
     for i in range(n):
         for j in range(n):
             for k in range(n):
-                C[i][j] += A[i][k] * B[k][j]
+                try:
+                    C[i][j] += A[i][k] * B[k][j]
+                except:
+                    # import ipdb; ipdb.set_trace()
+                    pass
 
     return C
 
@@ -91,6 +97,11 @@ def strassen(A, B, cross):
 
     DIV = LENGTH // 2
 
+    #def getSubMat(A, rowStart, rowEnd, colStart):
+
+    # when LENGTH is 103, aebf are all 50 and cgdh are all 51
+    # which one is wrong?? they should all be the same size I think
+    # len(B) is 102, so when did A and B become different sizes?
     a, e = getSubMat(A, 0, DIV, 0), getSubMat(B, 0, DIV, 0) # top lefts
     b, f = getSubMat(A, 0, DIV, DIV), getSubMat(B, 0, DIV, DIV) # top rights
     c, g = getSubMat(A, DIV, LENGTH, 0), getSubMat(B, DIV, LENGTH, 0) # bottom lefts
@@ -105,14 +116,12 @@ def strassen(A, B, cross):
     p7 = strassen(addSub(a, c, "-"), addSub(e, f, "+"), cross)
 
     topleft = addSub(addSub(addSub(p5, p4, "+"), p2, "-"), p6, "+")
-    # topleft = addSub(p5, addSub(p4, addSub(p2, p6, "+"), "-"), "+")
     topright = addSub(p1, p2, "+")
     bottomleft = addSub(p3, p4, "+")
     bottomright = addSub(addSub(addSub(p1, p5, "+"), p3, "-"), p7, "-")
-    # bottomright = addSub(p1, addSub(p5, addSub(p3, p7, "-"),"-"),"+")
 
     C = mergeMats(topleft, topright, bottomleft, bottomright)
-    
+
     return C
 
 def mergeMats(A, B, C, D):
@@ -142,8 +151,11 @@ def getSubMat(A, rowStart, rowEnd, colStart):
 
     for i in range(n):
         for j in range(n):
-            C[i][j] = A[rowStart + i][colStart + j]
-    
+            try:
+                C[i][j] = A[rowStart + i][colStart + j]
+            except:
+                import ipdb; ipdb.set_trace()
+
     return C
 
 # Add or Subtract Matices
@@ -154,13 +166,19 @@ def addSub(A, B, op):
     if op == "+":
         for i in range(n):
             for j in range(n):
-                C[i][j] = A[i][j] + B[i][j]
+                try:
+                    C[i][j] = A[i][j] + B[i][j]
+                except:
+                    import ipdb; ipdb.set_trace()
 
     elif op == "-":
         for i in range(n):
             for j in range(n):
-                C[i][j] = A[i][j] - B[i][j]
-    
+                try:
+                    C[i][j] = A[i][j] - B[i][j]
+                except:
+                    import ipdb; ipdb.set_trace()
+
     return C
 
 #######################################
@@ -223,9 +241,6 @@ def randomGraph(prob, n=1024):
             if i == j:
                 num = 0
             if j < i:
-                # print("len(A[j])"+str(len(A[j])))
-                # print("j: "+str(j))
-                # print("i: "+str(i))
                 num = A[j][i]
             A[i].append(num)
 
@@ -242,10 +257,10 @@ def getNumTriangles(A):
     return triangles
 
 
-# g = [[0, 1, 0, 1, 1], 
+# g = [[0, 1, 0, 1, 1],
 #     [1, 0, 1, 1, 1],
-#     [0, 1, 0, 1, 0], 
-#     [1, 1, 1, 0, 0], 
+#     [0, 1, 0, 1, 0],
+#     [1, 1, 1, 0, 0],
 #     [1, 1, 0, 0, 0]]
 
 # gSquared = strassen(g, g, 64)
@@ -254,14 +269,17 @@ def getNumTriangles(A):
 # printNice(gCubed)
 # print(getNumTriangles(gCubed))
 
+#### TEST PART 3 #####
+
 # probs = [0.01, 0.02, 0.03, 0.04, 0.05]
 # CROSS = 64
 # for p in probs:
-#     graph = randomGraph(p, 128)
+#     graph = randomGraph(p, 1024)
 #     # printNice(graph)
 #     graphNumPy = np.array(graph)
 #     graph2 = strassen(graph, graph, CROSS)
 #     graph2NumPy = np.dot(graphNumPy,graphNumPy)
+#     print(f"Finding triangles in random graph with prob {p}")
 #     if np.array_equal(np.array(graph2), graph2NumPy):
 #         print("Graph squared correctly")
 #     else:
@@ -363,6 +381,17 @@ def getNumTriangles(A):
 # print("bottom right")
 # printNice(h)
 
+# ### TEST INDEX ERRORS FROM GRADESCOPE
+#
+# A, B = matGen(1672)
+# C = strassen(A, B, 64)
+#
+# printNice(A)
+# print()
+# printNice(B)
+# print()
+# printNice(C)
+
 if __name__ == "__main__":
     # take input from command line
     # ./strassen 0 dimension inputfile
@@ -390,19 +419,21 @@ if __name__ == "__main__":
                     B.append([])
                     row += 1
                 B[row].append(int(line))
-            counter += 1    
-    
-    printNice(A)
-    print()
-    printNice(B)
-    print()
+            counter += 1
 
+    # printNice(A)
+    # print()
+    # printNice(B)
+    # print()
+
+    A, B = makePow2Mats(A, B) #pad input with zeros
     C = strassen(A, B, CROSS)
-    printNice(C)
-    print()
-    
+    # TODO: might have to remove the extra dimension
+    # printNice(C)
+    # print()
+
     # output the diagonal of C
     for i in range(dims):
         print(C[i][i])
-        
+
     print()

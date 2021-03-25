@@ -1,2 +1,2 @@
 #!/bin/bash
-Python strassen.py $1 $2 $3
+python3 strassen.py $1 $2 $3
